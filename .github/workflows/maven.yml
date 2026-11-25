@@ -46,3 +46,7 @@ jobs:
 
       - name: Verify Trivy
         run: trivy --version
+
+      - name: Trivy Secret Scan
+        run: |
+          trivy fs --scanners secret .
