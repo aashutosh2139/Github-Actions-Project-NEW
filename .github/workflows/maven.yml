@@ -83,8 +83,8 @@ jobs:
         
       - name: Tag Docker Image
         run: |
-          docker tag springboot-app:latest 123456789012.dkr.ecr.ap-south-1.amazonaws.com/springboot-app:latest
+          docker tag springboot-app:latest 123456789012.dkr.ecr.us-east-1.amazonaws.com/springboot-app:latest
 
       - name: Push Docker Image
         run: |
-          docker push 123456789012.dkr.ecr.ap-south-1.amazonaws.com/springboot-app:latest
+          docker push 123456789012.dkr.ecr.us-east-1.amazonaws.com/springboot-app:latest
