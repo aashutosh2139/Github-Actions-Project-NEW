@@ -20,7 +20,7 @@ jobs:
           distribution: "temurin"
           cache: maven
 
-      - name: Build
+      - name: Build Application
         run: mvn clean install
 
       - name: Print Java Version
@@ -50,18 +50,30 @@ jobs:
       - name: Trivy Secret Scan
         run: |
           trivy fs --scanners secret .
-        
+
       - name: Install Gitleaks
         run: |
-          curl -sSfL \
-          https://raw.githubusercontent.com/gitleaks/gitleaks/master/install.sh | \
+          curl -sSfL https://raw.githubusercontent.com/gitleaks/gitleaks/master/install.sh | \
           sudo sh -s -- -b /usr/local/bin
 
-#      - name: SonarQube Scan
-#        run: |
-#          mvn org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
-#           -Dsonar.host.url=${{ secrets.SONAR_HOST_URL }} \
-#           -Dsonar.token=${{ secrets.SONAR_TOKEN }}
+      - name: Verify Gitleaks
+        run: |
+          gitleaks version
+
+      - name: Gitleaks Scan
+        run: |
+          gitleaks detect --source .
+
+      # Uncomment after SonarQube is working
+      # - name: SonarQube Scan
+      #   run: |
+      #     mvn org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
+      #     -Dsonar.host.url=${{ secrets.SONAR_HOST_URL }} \
+      #     -Dsonar.token=${{ secrets.SONAR_TOKEN }}
+
+      - name: Verify JAR
+        run: |
+          ls -ltr target
 
       - name: Build Docker Image
         run: |
@@ -72,19 +84,20 @@ jobs:
           docker images
 
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credential@v4
+        uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
 
       - name: Login to Amazon ECR
+        id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
-        
+
       - name: Tag Docker Image
         run: |
-          docker tag springboot-app:latest 123456789012.dkr.ecr.us-east-1.amazonaws.com/springboot-app:latest
+          docker tag springboot-app:latest 026852303988.dkr.ecr.us-east-1.amazonaws.com/springboot-app:latest
 
       - name: Push Docker Image
         run: |
-          docker push 123456789012.dkr.ecr.us-east-1.amazonaws.com/springboot-app:latest
+          docker push 026852303988.dkr.ecr.us-east-1.amazonaws.com/springboot-app:latest
