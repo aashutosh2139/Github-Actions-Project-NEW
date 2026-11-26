@@ -56,3 +56,9 @@ jobs:
           curl -sSfL \
           https://raw.githubusercontent.com/gitleaks/gitleaks/master/install.sh | \
           sudo sh -s -- -b /usr/local/bin
+
+      - name: SonarQube Scan
+        run: |
+          mvn sonar:sonar \
+          -Dsonar.host.url=${{ secrets.SONAR_HOST_URL }} \
+          -Dsonar.login=${{ secrets.SONAR_TOKEN }}
