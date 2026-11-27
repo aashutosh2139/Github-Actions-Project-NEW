@@ -106,3 +106,23 @@ jobs:
       - name: Push Docker Image
         run: |
           docker push 026852303988.dkr.ecr.us-east-1.amazonaws.com/springboot-app:latest
+
+      - name: Deploy To EC2
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 026852303988.dkr.ecr.us-east-1.amazonaws.com
+
+            docker pull 026852303988.dkr.ecr.us-east-1.amazonaws.com/springboot-app:latest
+
+            docker stop springboot-app || true
+            docker rm springboot-app || true
+
+            docker run -d \
+            --name springboot-app \
+            --network bank-network \
+            -p 8080:8080 \
+            026852303988.dkr.ecr.us-east-1.amazonaws.com/springboot-app:latest
